@@ -1,1 +1,4 @@
 ai/
+.venv/
+.env
+uv.lock
