@@ -9,11 +9,13 @@ from langchain_community.tools import WikipediaQueryRun
 from langchain_community.utilities import WikipediaAPIWrapper
 from langchain_community.tools.yahoo_finance_news import YahooFinanceNewsTool
 from langchain.agents import create_agent
+from langgraph.checkpoint.memory import InMemorySaver
 
 load_dotenv()
 
 os.environ["GROQ_API_KEY"] = os.getenv("GROQ_API_KEY")
 os.environ["SERP_API_KEY"] = os.getenv("SERP_API_KEY")
+os.environ["USER_AGENT"] = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"
 
 llm = ChatGroq(
     model="openai/gpt-oss-20b",
@@ -98,11 +100,22 @@ Given a stock ticker or company name, produce a concise, structured analyst brie
 my_finance_agent = create_agent(
     model= llm,
     tools=tools,
-    system_prompt=SYSTEM_PROMPT
+    system_prompt=SYSTEM_PROMPT,
+    checkpointer=InMemorySaver()
 )
 
+config = {"configurable": {"thread_id": "user-tano-session-1"}}
+
 agent_trace = my_finance_agent.invoke(
-    {"messages": [{"role": "user", "content": "Give me a quick analyst brief on NVDA. Is now a good time to buy?"}]}
+    {"messages": [{"role": "user", "content": "Give me a quick analyst brief on NVDA. Is now a good time to buy?"}]},
+    config
+)
+
+print(agent_trace["messages"][-1].content)
+
+agent_trace = my_finance_agent.invoke(
+    {"messages": [{"role": "user", "content": "How does it compare with AMD?"}]},
+    config
 )
 
 print(agent_trace["messages"][-1].content)

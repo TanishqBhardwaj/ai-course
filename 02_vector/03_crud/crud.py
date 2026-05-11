@@ -10,7 +10,7 @@ model = SentenceTransformer("all-MiniLM-L6-v2")
 new_text   = "My name is Tano."
 new_vector = model.encode(new_text).tolist()
 
-CREATE 
+#CREATE 
 client.upsert(
     collection_name="tano_collection1",
     points=[
